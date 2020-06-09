@@ -2,6 +2,8 @@ package org.dieschnittstelle.ess.ejb.ejbmodule.erp;
 
 import org.dieschnittstelle.ess.entities.erp.IndividualisedProductItem;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 import java.util.List;
 
 /**
@@ -26,21 +28,27 @@ public interface StockSystemRESTService {
 	/**
 	 * returns all products on stock of some pointOfSale
 	 */
+	@GET
+	@Path("/products")
     List<IndividualisedProductItem> getProductsOnStock(long pointOfSaleId);
 
 	/**
 	 * returns all products on stock
 	 */
+	@GET
+	@Path("/products")
     List<IndividualisedProductItem> getAllProductsOnStock();
 
 	/**
 	 * returns the units on stock for a product at some point of sale
 	 */
+	@GET
     int getUnitsOnStock(long productId, long pointOfSaleId);
 
 	/**
 	 * returns the total number of units on stock for some product
 	 */
+	@GET
     int getTotalUnitsOnStock(long productId);
 
 	/**

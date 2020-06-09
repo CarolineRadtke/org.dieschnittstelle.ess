@@ -1,10 +1,6 @@
 package org.dieschnittstelle.ess.basics.annotations.stockitemtypes;
 
-import org.dieschnittstelle.ess.basics.annotations.Initialise;
-import org.dieschnittstelle.ess.basics.annotations.Brandname;
-import org.dieschnittstelle.ess.basics.annotations.StockItem;
-import org.dieschnittstelle.ess.basics.annotations.Purchase;
-import org.dieschnittstelle.ess.basics.annotations.Units;
+import org.dieschnittstelle.ess.basics.annotations.*;
 
 @StockItem
 public class Milch {
@@ -13,6 +9,7 @@ public class Milch {
 	private int menge;
 
 	@Brandname
+	@DisplayAs("OwnAnnotation:Marke")
 	private String markenname;
 
 	public int getMenge() {
@@ -48,7 +45,7 @@ public class Milch {
 		this.markenname = brandname;
 		this.menge = units;
 	}
-	
+
 	/**
 	 * our own toString method
 	 */
