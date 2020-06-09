@@ -1,13 +1,18 @@
 package org.dieschnittstelle.ess.ser.client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.concurrent.Future;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +20,7 @@ import org.dieschnittstelle.ess.entities.crm.AbstractTouchpoint;
 import org.dieschnittstelle.ess.entities.crm.Address;
 import org.dieschnittstelle.ess.entities.crm.StationaryTouchpoint;
 import org.dieschnittstelle.ess.utils.Http;
+
 
 import static org.dieschnittstelle.ess.utils.Utils.*;
 
@@ -35,7 +41,7 @@ public class ShowTouchpointService {
 	 * the http client that can be used for accessing the service on tomcat - note that we are usying an async client here
 	 */
 	private CloseableHttpAsyncClient client;
-	
+
 	/**
 	 * the attribute that controls whether we are running through (when called from the junit test) or not
 	 */
@@ -103,7 +109,7 @@ public class ShowTouchpointService {
 
 	/**
 	 * read all touchpoints
-	 * 
+	 *
 	 * @return
 	 */
 	public List<AbstractTouchpoint> readAllTouchpoints() {
@@ -128,15 +134,26 @@ public class ShowTouchpointService {
 
 			logger.info("readAllTouchpoints(): about to execute request: " + get);
 
+			// in Demo --> umwandlung von Java ins binärformat --> und wieder output
+
+//			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//			ObjectOutputStream oos = new ObjectOutputStream(bos);
+//			oos.writeObject(tp); // serialisierte Java Obj
+			// das muss jetzt auf den Request drauf
+//			ByteArrayEntity bae = new ByteArrayEntity(bos.toByteArray());
+			// request.setEntity(bae); --> gibt schon aufschluss über Attribute
 			// mittels der <request>.setHeader() Methode koennen Header-Felder
 			// gesetzt werden
+
 
 			// execute the method and obtain the response - for AsyncClient this will be a future from
 			// which the response object can be obtained synchronously calling get() - alternatively, a FutureCallback can
 			// be passed to the execute() method
 			Future<HttpResponse> responseFuture = client.execute(get, null);
 			logger.info("readAllTouchpoints(): received response future...");
+			// future in JS=Promise
 
+			// get() ermöglicht es async furure methoden (wie await)
 			HttpResponse response = responseFuture.get();
 			logger.info("readAllTouchpoints(): received response value");
 
@@ -147,6 +164,9 @@ public class ShowTouchpointService {
 				ObjectInputStream ois = new ObjectInputStream(response
 						.getEntity().getContent());
 
+				//demo
+//				AbstractTouchpoint createdTp = (AbstractTouchpoint)ois.readObject();
+
 				List<AbstractTouchpoint> touchpoints = (List<AbstractTouchpoint>) ois
 						.readObject();
 
@@ -156,7 +176,8 @@ public class ShowTouchpointService {
 				// subsequent requests
 				EntityUtils.consume(response.getEntity());
 
-				return touchpoints;
+				// return the onject that you have read from response
+				return touchpoints; // oder createdTp
 
 			} else {
 				String err = "could not successfully execute request. Got status code: "
@@ -174,7 +195,7 @@ public class ShowTouchpointService {
 
 	/**
 	 * TODO SER4
-	 * 
+	 *
 	 * @param tp
 	 */
 	public void deleteTouchpoint(AbstractTouchpoint tp) {
@@ -184,6 +205,33 @@ public class ShowTouchpointService {
 
 		logger.debug("client running: {}",client.isRunning());
 
+		try {
+			logger.info("send ID"+ tp.getId());
+			HttpDelete delete = new HttpDelete("http://localhost:8888/org.dieschnittstelle.ess.ser/api/touchpoints/delete/" + tp.getId() );
+
+
+			Future<HttpResponse> responseFuture = client.execute(delete, null);
+			HttpResponse response = responseFuture.get();
+
+
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+
+				logger.info(" Delete successful");
+
+
+			} else {
+				String err = "could not successfully execute delete request. Got status code: "
+						+ response.getStatusLine().getStatusCode();
+				logger.error(err);
+				throw new RuntimeException(err);
+			}
+			EntityUtils.consume(response.getEntity());
+		}
+		catch (Exception e){
+			logger.error("got exception: " + e, e);
+			throw new RuntimeException(e);
+		}
+
 		// once you have received a response this is necessary to be able to
 		// use the client for subsequent requests:
 		// EntityUtils.consume(response.getEntity());
@@ -192,12 +240,12 @@ public class ShowTouchpointService {
 
 	/**
 	 * TODO SER3
-	 * 
+	 *
 	 * fuer das Schreiben des zu erzeugenden Objekts als Request Body siehe die
 	 * Hinweise auf:
 	 * http://stackoverflow.com/questions/10146692/how-do-i-write-to
 	 * -an-outpustream-using-defaulthttpclient
-	 * 
+	 *
 	 * @param tp
 	 */
 	public AbstractTouchpoint createNewTouchpoint(AbstractTouchpoint tp) {
@@ -210,38 +258,86 @@ public class ShowTouchpointService {
 		try {
 
 			// create post request for the api/touchpoints uri
+			HttpPost post = new HttpPost(
+					"http://localhost:8888/org.dieschnittstelle.ess.ser/api/touchpoints");
+
+			logger.info("get Post: " + post);
 
 			// create an ObjectOutputStream from a ByteArrayOutputStream - the
 			// latter must be accessible via a variable
 
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+
 			// write the object to the output stream
+//			TouchpointCRUDExecutor exec = (TouchpointCRUDExecutor) getServletContext().getAttribute("touchpointCRUD");
+//			tp = TouchpointCRUDExecutor.createTouchpoint(tp);
+			oos.writeObject(tp); // serialisierte Java Obj
 
 			// create a ByteArrayEntity and pass it the byte array from the
 			// output stream
 
+			ByteArrayEntity bae = new ByteArrayEntity(bos.toByteArray());
+
 			// set the entity on the request
+			post.setEntity(bae);
 
 			// execute the request, which will return a Future<HttpResponse> object
+			Future<HttpResponse> responseFuture = client.execute(post, null);
 
 			// get the response from the Future object
+			HttpResponse response = responseFuture.get();
+
 
 			// log the status line
+			logger.info("createNewTouchpoints(): received response value");
+
 
 			// evaluate the result using getStatusLine(), use constants in
 			// HttpStatus
 
 			/* if successful: */
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
 
-			// create an object input stream using getContent() from the
-			// response entity (accessible via getEntity())
 
-			// read the touchpoint object from the input stream
 
-			// cleanup the request
-			// EntityUtils.consume(response.getEntity());
+				// create an object input stream using getContent() from the
+				// response entity (accessible via getEntity())
 
-			// return the object that you have read from the response
-			return null;
+				// try to read out an object from the response entity
+				ObjectInputStream ois = new ObjectInputStream(response
+						.getEntity().getContent());
+
+
+
+
+				// read the touchpoint object from the input stream
+				AbstractTouchpoint touchpoint = (AbstractTouchpoint)ois.readObject();
+
+				logger.info("read touchpoints after creation: " + touchpoint);
+
+
+
+				// cleanup the request
+				// EntityUtils.consume(response.getEntity());
+
+				// this is necessary to be able to use the client for
+				// subsequent requests
+				EntityUtils.consume(response.getEntity());
+
+
+
+
+
+				// return the object that you have read from the response
+				// return the object that you have read from response
+				return touchpoint; // oder createdTp
+			} else {
+				String err = "could not successfully execute request. Got status code: "
+						+ response.getStatusLine().getStatusCode();
+				logger.error(err);
+				throw new RuntimeException(err);
+			}
 		} catch (Exception e) {
 			logger.error("got exception: " + e, e);
 			throw new RuntimeException(e);
@@ -250,7 +346,7 @@ public class ShowTouchpointService {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param stepwise
 	 */
 	public void setStepwise(boolean stepwise) {
@@ -265,7 +361,7 @@ public class ShowTouchpointService {
 			System.out.println("/>");
 			System.in.read();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 	}

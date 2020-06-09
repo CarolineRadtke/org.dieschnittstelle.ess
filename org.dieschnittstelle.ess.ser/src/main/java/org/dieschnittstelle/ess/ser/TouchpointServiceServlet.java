@@ -1,7 +1,13 @@
 package org.dieschnittstelle.ess.ser;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -9,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import static org.dieschnittstelle.ess.utils.Utils.*;
 
 import org.apache.logging.log4j.Logger;
+import org.dieschnittstelle.ess.entities.crm.AbstractTouchpoint;
 
 public class TouchpointServiceServlet extends HttpServlet {
 
@@ -18,10 +25,36 @@ public class TouchpointServiceServlet extends HttpServlet {
 	public TouchpointServiceServlet() {
 		show("TouchpointServiceServlet: constructor invoked\n");
 	}
-	
+
+	@Override
+	protected void doDelete(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException {
+
+		try {
+			String uri =  req.getPathInfo();
+			String idStr = uri.replaceAll("[^0-9]", "");
+			long id = Long.parseLong(idStr);
+
+
+			TouchpointCRUDExecutor exec = (TouchpointCRUDExecutor) getServletContext()
+					.getAttribute("touchpointCRUD");
+			boolean success = exec.deleteTouchpoint(id);
+			if(success){
+				response.setStatus(HttpServletResponse.SC_OK);
+			} else {
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			}
+
+
+		} catch (Exception e) {
+			String err = "got exception while delete: " + e;
+			logger.error(err, e);
+			throw new RuntimeException(e);
+		}
+	}
+
 	@Override
 	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) {
+						 HttpServletResponse response) {
 
 		logger.info("doGet()");
 
@@ -48,39 +81,41 @@ public class TouchpointServiceServlet extends HttpServlet {
 		}
 
 	}
-	
-	/*
-	@Override	
+
+	@Override
 	protected void doPost(HttpServletRequest request,
-			HttpServletResponse response) {
+						  HttpServletResponse response) {
 
 		// assume POST will only be used for touchpoint creation, i.e. there is
 		// no need to check the uri that has been used
 
 		// obtain the executor for reading out the touchpoints from the servlet context using the touchpointCRUD attribute
-
+		TouchpointCRUDExecutor exec = (TouchpointCRUDExecutor) getServletContext().getAttribute("touchpointCRUD");
 		try {
 			// create an ObjectInputStream from the request's input stream
-		
+			ObjectInputStream ois = new ObjectInputStream(request.getInputStream()); // an den Body ran
 			// read an AbstractTouchpoint object from the stream
-		
+			AbstractTouchpoint tp = (AbstractTouchpoint) ois.readObject();
 			// call the create method on the executor and take its return value
-		
+
+			exec.createTouchpoint(tp);
 			// set the response status as successful, using the appropriate
 			// constant from HttpServletResponse
-		
+			response.setStatus(HttpServletResponse.SC_CREATED);;
+
 			// then write the object to the response's output stream, using a
 			// wrapping ObjectOutputStream
-		
+			ObjectOutputStream oos = new ObjectOutputStream(response.getOutputStream()); // kann auf res body zugreifen
 			// ... and write the object to the stream
-		
+
+			oos.writeObject(tp);
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
 	}
-	*/
 
 
-	
+
 }
