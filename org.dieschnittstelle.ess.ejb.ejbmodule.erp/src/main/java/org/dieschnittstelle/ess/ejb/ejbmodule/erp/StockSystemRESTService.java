@@ -2,8 +2,10 @@ package org.dieschnittstelle.ess.ejb.ejbmodule.erp;
 
 import org.dieschnittstelle.ess.entities.erp.IndividualisedProductItem;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import java.util.List;
 
 /**
@@ -30,7 +32,7 @@ public interface StockSystemRESTService {
 	 */
 	@GET
 	@Path("/products")
-    List<IndividualisedProductItem> getProductsOnStock(long pointOfSaleId);
+    List<IndividualisedProductItem> getProductsOnStock(@QueryParam("pointOfSaleId")  long pointOfSaleId);
 
 	/**
 	 * returns all products on stock
@@ -42,18 +44,29 @@ public interface StockSystemRESTService {
 	/**
 	 * returns the units on stock for a product at some point of sale
 	 */
-	@GET
-    int getUnitsOnStock(long productId, long pointOfSaleId);
+	@Override
+    int getUnitsOnStock(@QueryParam("productId") long productId, @QueryParam("pointOfSaleId") long pointOfSaleId){
+		return 0;
+	};
 
 	/**
 	 * returns the total number of units on stock for some product
 	 */
 	@GET
-    int getTotalUnitsOnStock(long productId);
+    int getTotalUnitsOnStock(@QueryParam("productId") long productId);
 
 	/**
 	 * returns the points of sale where some product is available
 	 */
-    List<Long> getPointsOfSale(long productId);
+	@Override
+    List<Long> getPointsOfSale(long productId){
+		AbstractProduct prod = productCRUD.readProduct(productId);
+		if(prod instanceof IndividualisedProductItem){
+			return stockSystem.getPointsOfSale((IndividualisedProductItem) prod)
+		} else {
+			throw new BadRequestException("prodId" + productId + "does not refer to an Individualized Product Item")
+		}
+
+	};
 
 }

@@ -7,11 +7,18 @@ import org.dieschnittstelle.ess.entities.erp.AbstractProduct;
 import org.dieschnittstelle.ess.entities.erp.IndividualisedProductItem;
 
 import org.dieschnittstelle.ess.jrs.IProductCRUDService;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+
+import javax.ws.rs.client.WebTarget;
+
+// Service Proxy implementieren --> orientieren an Demo für Client Seite
 
 public class ProductCRUDRESTClient {
 
 	private IProductCRUDService serviceProxy;
-	
+
 	protected static Logger logger = org.apache.logging.log4j.LogManager.getLogger(ProductCRUDRESTClient.class);
 
 	public ProductCRUDRESTClient() throws Exception {
@@ -21,7 +28,16 @@ public class ProductCRUDRESTClient {
 		 * create a client for the web service using ResteasyClientBuilder and ResteasyWebTarget
 		 */
 		serviceProxy = null;
+
+		ResteasyClient client = new ResteasyClientBuilder().build();
+		ResteasyWebTarget target = client.target("http://localhost:8888/org.dieschnittstelle.ess.jrs/api" );
+
+		serviceProxy = target.proxy(IProductCRUDService.class);
+		logger.info("serviceProxy = ", serviceProxy);
+
 	}
+
+
 
 	public AbstractProduct createProduct(IndividualisedProductItem prod) {
 		AbstractProduct created = serviceProxy.createProduct(prod);
