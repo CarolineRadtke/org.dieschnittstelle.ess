@@ -1,5 +1,6 @@
 package org.dieschnittstelle.ess.ejb.ejbmodule.crm;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ import org.apache.logging.log4j.Logger;
  */
 @Stateful
 @Entity
-public class ShoppingCartStateful implements ShoppingCartRemote, ShoppingCartLocal {
+public class ShoppingCartStateful implements ShoppingCartRemote, ShoppingCartLocal, Serializable {
 
 	@Id
 	@GeneratedValue

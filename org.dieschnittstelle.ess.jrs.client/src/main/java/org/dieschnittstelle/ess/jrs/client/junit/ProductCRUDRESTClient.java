@@ -27,7 +27,7 @@ public class ProductCRUDRESTClient {
 		/*
 		 * create a client for the web service using ResteasyClientBuilder and ResteasyWebTarget
 		 */
-		serviceProxy = null;
+
 
 		ResteasyClient client = new ResteasyClientBuilder().build();
 		ResteasyWebTarget target = client.target("http://localhost:8888/org.dieschnittstelle.ess.jrs/api" );

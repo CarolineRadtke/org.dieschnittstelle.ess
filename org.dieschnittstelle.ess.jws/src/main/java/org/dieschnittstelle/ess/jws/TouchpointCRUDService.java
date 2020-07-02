@@ -27,6 +27,12 @@ public class TouchpointCRUDService {
 	@Resource
 	private WebServiceContext wscontext;
 
+
+	private GenericCRUDExecutor<AbstractTouchpoint> getExectFromContext(){
+		ServletContext servletContext = (ServletContext) wscontext.getMessageContext().get(MessageContext.SERVLET_CONTEXT);
+		return (GenericCRUDExecutor<AbstractTouchpoint>) servletContext.getAttribute("touchpointCRUD"); // productCrud in Übung;
+	}
+
 	public TouchpointCRUDService() {
 		logger.info("<constructor>");
 	}
@@ -45,6 +51,8 @@ public class TouchpointCRUDService {
 
 	@WebMethod
 	public List<AbstractTouchpoint> readAllTouchpoints() {
+
+
 		logger.info("readAllTouchpoints()");
 
 		logger.info("readAllTouchpoints(): I am: " + this);

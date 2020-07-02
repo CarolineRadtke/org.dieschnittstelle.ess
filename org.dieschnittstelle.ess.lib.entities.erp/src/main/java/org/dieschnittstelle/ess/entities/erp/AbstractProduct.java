@@ -9,6 +9,7 @@ import org.dieschnittstelle.ess.entities.GenericCRUDEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 
@@ -16,7 +17,7 @@ import javax.persistence.Id;
 @Entity
 @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY,
 		property="@class")
-@JsonIgnoreProperties(ignoreUnknown =  true)
+//@JsonIgnoreProperties(ignoreUnknown =  true)
 
 public abstract class AbstractProduct implements Serializable, GenericCRUDEntity {
 
@@ -25,7 +26,7 @@ public abstract class AbstractProduct implements Serializable, GenericCRUDEntity
 	private static final long serialVersionUID = 6940403029597060153L;
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
 	private String name;

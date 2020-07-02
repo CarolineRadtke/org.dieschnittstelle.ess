@@ -2,6 +2,7 @@ package org.dieschnittstelle.ess.ejb.ejbmodule.crm;
 
 import org.dieschnittstelle.ess.entities.crm.ShoppingCartItem;
 
+import javax.ejb.Remote;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @Path("/shoppingcarts")
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
+@Remote
 public interface ShoppingCartRESTService {
 
     @POST

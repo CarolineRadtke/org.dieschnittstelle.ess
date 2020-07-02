@@ -1,6 +1,7 @@
 package org.dieschnittstelle.ess.ejb.ejbmodule.erp.crud;
 
 import org.dieschnittstelle.ess.entities.erp.AbstractProduct;
+import org.dieschnittstelle.ess.entities.erp.PointOfSale;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -30,7 +31,8 @@ public class ProuctCRUDStateless implements ProductCRUDRemote {
 
     @Override
     public AbstractProduct updateProduct(AbstractProduct update) {
-        return null;
+        return em.merge(update);
+
     }
 
     @Override
@@ -40,6 +42,7 @@ public class ProuctCRUDStateless implements ProductCRUDRemote {
 
     @Override
     public boolean deleteProduct(long productID) {
-        return false;
+        em.remove(em.find(AbstractProduct.class, productID));
+        return true;
     }
 }

@@ -1,7 +1,8 @@
-package org.dieschnittstelle.ess.ejb.ejbmodule.erp.crud;
+package org.dieschnittstelle.ess.ejb.ejbmodule.erp;
 
 import org.dieschnittstelle.ess.ejb.ejbmodule.erp.StockSystemLocal;
 import org.dieschnittstelle.ess.ejb.ejbmodule.erp.StockSystemRESTService;
+import org.dieschnittstelle.ess.ejb.ejbmodule.erp.crud.ProductCRUDRemote;
 import org.dieschnittstelle.ess.entities.erp.AbstractProduct;
 import org.dieschnittstelle.ess.entities.erp.IndividualisedProductItem;
 import org.graalvm.compiler.lir.LIRInstruction;
@@ -38,8 +39,18 @@ public class StockSystemRestServiceImpl implements StockSystemRESTService {
 
     @Override
     public List<IndividualisedProductItem> getProductsOnStock(long pointOfSaleId) {
-        return null;
+        if(pointOfSaleId > 0 ){
+            return stockSystem.getProductsOnStock(pointOfSaleId);
+        } else {
+            return stockSystem.getAllProductsOnStock();
+        }
+
     }
+
+//    @Override
+//    public List<IndividualisedProductItem> getAllProductsOnStock() {
+//        return stockSystem.getAllProductsOnStock();
+//    }
 
     @Override
     public int getUnitsOnStock(long productId, long pointOfSaleId) {
@@ -57,14 +68,19 @@ public class StockSystemRestServiceImpl implements StockSystemRESTService {
         }
     }
 
+//    @Override
+//    public int getTotalUnitsOnStock(long productId) {
+//        return 0;
+//    }
+
     @Override
     public List<Long> getPointsOfSale(long productId) 	{
 		AbstractProduct prod = productCRUD.readProduct(productId);
-		if(prod instanceof IndividualisedProductItem){
+//		if(prod instanceof IndividualisedProductItem){
 			return stockSystem.getPointsOfSale((IndividualisedProductItem) prod);
-		} else {
-			throw new BadRequestException("prodId" + productId + "does not refer to an Individualized Product Item");
-		}
+//		} else {
+//			throw new BadRequestException("prodId" + productId + "does not refer to an Individualized Product Item");
+//		}
 
 	};
 }

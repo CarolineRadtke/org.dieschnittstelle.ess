@@ -59,6 +59,10 @@ public class ShoppingCartRESTServiceImpl implements ShoppingCartRESTService {
         return true;
     }
 
+   public ShoppingCartRemote getCartForId(long cartId) {
+        return em.find(ShoppingCartStateful.class, cartId);
+   }
+
     // if a task shall be scheduled every couple of seconds, also hour and minute need to be specied as "any" ('*')
     // because these attributes default to 0
     @Schedule(second="*/30", hour="*", minute = "*", persistent = false)
