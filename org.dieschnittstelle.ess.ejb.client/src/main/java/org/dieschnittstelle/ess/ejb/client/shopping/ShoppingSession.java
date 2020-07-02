@@ -40,6 +40,8 @@ public class ShoppingSession implements ShoppingBusinessDelegate {
 	 */
 	private AbstractTouchpoint touchpoint;
 
+
+
 	public ShoppingSession() {
 		logger.info("<constructor>");
 		try {

@@ -60,5 +60,6 @@
     <orderEntry type="library" name="Maven: com.sun.xml.ws:sdo-eclipselink-plugin:2.3.2" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.persistence:org.eclipse.persistence.sdo:2.7.4" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.persistence:commonj.sdo:2.1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.dieschnittstelle.ess.shared:lib-entities-erp:1.0" level="project" />
   </component>
 </module>

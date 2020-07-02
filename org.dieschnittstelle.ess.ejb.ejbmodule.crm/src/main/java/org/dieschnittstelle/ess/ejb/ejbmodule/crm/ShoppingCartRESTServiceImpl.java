@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Singleton
 @Startup
-public class ShoppingCartRESTServiceImpl implements ShoppingCartRESTService {
+public class ShoppingCartRESTServiceImpl implements ShoppingCartRESTService, ShoppingCartServiceLocal {
 
     protected static Logger logger = org.apache.logging.log4j.LogManager.getLogger(ShoppingCartRESTServiceImpl.class);
 
