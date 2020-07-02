@@ -2,6 +2,8 @@ package org.dieschnittstelle.ess.ejb.ejbmodule.crm.crud;
 
 import org.dieschnittstelle.ess.ejb.ejbmodule.crm.ShoppingException;
 import org.dieschnittstelle.ess.ejb.ejbmodule.crm.shopping.PurchaseShoppingCartService;
+import org.dieschnittstelle.ess.ejb.ejbmodule.erp.StockSystemRemote;
+import org.dieschnittstelle.ess.ejb.ejbmodule.erp.crud.ProductCRUDRemote;
 import org.dieschnittstelle.ess.entities.crm.ShoppingCartItem;
 
 import javax.ejb.Stateless;
@@ -15,9 +17,12 @@ import org.dieschnittstelle.ess.entities.crm.CustomerTransaction;
 
 import org.dieschnittstelle.ess.entities.erp.AbstractProduct;
 import org.dieschnittstelle.ess.entities.erp.Campaign;
+import org.dieschnittstelle.ess.entities.erp.IndividualisedProductItem;
+import org.dieschnittstelle.ess.entities.erp.ProductBundle;
 
 import javax.ejb.EJB;
 
+import java.util.Collection;
 import java.util.List;
 
 @Stateless
@@ -48,6 +53,12 @@ public class PurchaseShoppingCartServiceStateless implements PurchaseShoppingCar
 
     @EJB
     private TouchpointCRUDLocal touchpointCRUDLocal;
+
+    @EJB
+    private ProductCRUDRemote productCRUDRemote;
+
+    @EJB
+    private StockSystemRemote stockSystemRemote;
 
 
     /**
@@ -130,12 +141,39 @@ public class PurchaseShoppingCartServiceStateless implements PurchaseShoppingCar
 
         for (ShoppingCartItem item : this.shoppingCart.getItems()) {
 
+
+            AbstractProduct getItem = this.productCRUDRemote.readProduct(item.getErpProductId());
             // TODO: ermitteln Sie das AbstractProduct für das gegebene ShoppingCartItem. Nutzen Sie dafür dessen erpProductId und die ProductCRUD EJB
 
             if (item.isCampaign()) {
                 this.campaignTracking.purchaseCampaignAtTouchpoint(item.getErpProductId(), this.touchpoint,
                         item.getUnits());
                 // TODO: wenn Sie eine Kampagne haben, muessen Sie hier
+
+
+                Campaign camp = (Campaign) productCRUDRemote.readProduct(item.getErpProductId());
+                Collection<ProductBundle> bundles = camp.getBundles();
+
+
+                for (ProductBundle bundle : bundles){
+                   AbstractProduct prod = bundle.getProduct();
+
+                   // im Warenkorb
+                   int itemUnits = item.getUnits();
+                    // Units im Bundle
+                    int unitsinBundle = bundle.getUnits();
+
+                   int multi = unitsinBundle *  itemUnits;
+                   int totalUnits = stockSystemRemote.getTotalUnitsOnStock((IndividualisedProductItem)prod);
+
+                   if(multi < totalUnits){
+                       stockSystemRemote.removeFromStock((IndividualisedProductItem) prod, touchpoint.getErpPointOfSaleId(),multi );
+                   }
+
+
+
+
+                }
                 // 1) ueber die ProductBundle Objekte auf dem Campaign Objekt iterieren, und
                 // 2) fuer jedes ProductBundle das betreffende Produkt in der auf dem Bundle angegebenen Anzahl, multipliziert mit dem Wert von
                 // item.getUnits() aus dem Warenkorb,
@@ -145,6 +183,11 @@ public class PurchaseShoppingCartServiceStateless implements PurchaseShoppingCar
                 // Warenkorb liegt)
             } else {
                 // TODO: andernfalls (wenn keine Kampagne vorliegt) muessen Sie
+                int units = item.getUnits();
+                int totalUnits = stockSystemRemote.getTotalUnitsOnStock((IndividualisedProductItem)getItem);
+                if(totalUnits > units){
+                    stockSystemRemote.removeFromStock((IndividualisedProductItem) getItem, touchpoint.getErpPointOfSaleId(), units);
+                }
                 // 1) das Produkt in der in item.getUnits() angegebenen Anzahl hinsichtlich Verfuegbarkeit ueberpruefen und
                 // 2) das Produkt, falls verfuegbar, in der entsprechenden Anzahl aus dem Warenlager entfernen
             }

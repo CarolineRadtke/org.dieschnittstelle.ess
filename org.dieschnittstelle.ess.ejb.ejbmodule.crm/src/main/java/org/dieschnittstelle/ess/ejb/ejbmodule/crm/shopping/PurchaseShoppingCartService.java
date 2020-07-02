@@ -13,7 +13,7 @@ import javax.ws.rs.core.MediaType;
 @Consumes({MediaType.APPLICATION_JSON})
 @Produces({MediaType.APPLICATION_JSON})
 @Remote
-// TODO: PAT1: this is the interface to be provided as a rest service if rest service access is used
+
 public interface PurchaseShoppingCartService {
 
 	@POST
