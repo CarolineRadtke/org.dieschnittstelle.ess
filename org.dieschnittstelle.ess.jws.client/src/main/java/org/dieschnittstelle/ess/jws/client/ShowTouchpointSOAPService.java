@@ -19,6 +19,7 @@ import javax.jws.soap.SOAPBinding;
 import javax.xml.ws.Response;
 
 
+
 public class ShowTouchpointSOAPService {
 
 	protected static Logger logger = org.apache.logging.log4j.LogManager

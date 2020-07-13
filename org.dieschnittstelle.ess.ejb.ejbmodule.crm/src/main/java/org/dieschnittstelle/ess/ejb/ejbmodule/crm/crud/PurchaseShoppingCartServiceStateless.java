@@ -163,6 +163,7 @@ public class PurchaseShoppingCartServiceStateless implements PurchaseShoppingCar
                     // Units im Bundle
                     int unitsinBundle = bundle.getUnits();
 
+                    // items insgesamt, die in der Campain enthalten sind müssen so oft aus der db gelöscht werden, wie die campain gekauft wurde
                    int multi = unitsinBundle *  itemUnits;
                    int totalUnits = stockSystemRemote.getTotalUnitsOnStock((IndividualisedProductItem)prod);
 
